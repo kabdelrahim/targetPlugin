@@ -1,0 +1,11 @@
+name: TargetPlugin
+version: '${version}'
+
+main: fr.aleyu.targetPlugin.TargetPlugin
+api-version: '1.21.11'
+load: POSTWORLD
+
+authors: [ AleYu ]
+
+commands:
+  target:
