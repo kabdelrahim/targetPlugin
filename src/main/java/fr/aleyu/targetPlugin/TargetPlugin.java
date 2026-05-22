@@ -6,10 +6,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.scoreboard.Team;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 
 public final class TargetPlugin extends JavaPlugin {
 
@@ -43,6 +47,7 @@ public final class TargetPlugin extends JavaPlugin {
 
             @Override
             public void run() {
+
                 for (UUID uuid : enabledPlayers) {
                     Player player = getServer().getPlayer(uuid);
                     if (player == null) {
@@ -52,12 +57,38 @@ public final class TargetPlugin extends JavaPlugin {
                     // Récupérer la cible du joueur
                     Entity target = player.getTargetEntity(10); // 10 blocs de distance max
 
-                    // Si la cible est un joueur
+                    // PLAYER
                     if (target instanceof Player targetPlayer) {
-                        player.sendActionBar(
-                                Component.text("§e" + targetPlayer.getName())
-                        );
-                    } else if (target instanceof ArmorStand armorStand) {
+
+                        Team team = targetPlayer.getScoreboard().getTeam(targetPlayer.getName());
+
+                        Component message;
+
+                        // Si le joueur a une team
+                        if (team != null) {
+
+                            NamedTextColor color = NamedTextColor.WHITE;
+
+                            if (team.color() != null) {
+                                color = (NamedTextColor) team.color();
+                            }
+
+                            Component prefix = team.prefix();
+
+                            message = prefix.append(
+                                    Component.text(targetPlayer.getName(), color)
+                            );
+                        } else {
+
+                            // Pas de team
+                            message = Component.text(targetPlayer.getName());
+                        }
+
+                        player.sendActionBar(message);
+                    }
+
+                    // ARMOR STAND
+                    else if (target instanceof ArmorStand armorStand) {
                         String name = armorStand.getCustomName();
 
                         if (name != null) {
@@ -66,9 +97,14 @@ public final class TargetPlugin extends JavaPlugin {
                             );
                         }
                     }
+
+                    // Rien regardé
+                    else {
+                        player.sendActionBar(Component.empty());
+                    }
                 }
             }
-        }.runTaskTimer(this, 0L, 20L); // Exécute toutes les secondes (20 ticks)
+        }.runTaskTimer(this, 0L, 1L); // Exécute toutes les secondes (20 ticks)
     }
 
     @Override
